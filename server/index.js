@@ -1,32 +1,42 @@
 const express = require('express');
-let bodyParse = require('body-parser');
-let save = require('../database/index.js').save
-let getRepos = require('../database/index.js').getRepos
-let getReposByUsername = require('../helpers/github.js').getReposByUsername
+let bodyParser = require('body-parser');
+const helper = require("../helpers/github");
+const db = require("../database/index")
+
 let app = express();
 
 app.use(express.static(__dirname + '/../client/dist'));
-app.use(function(req, res, next){
-	res.set({
-		'Access-Control-Allow-Origin': '*',
-		'Access-Control-Allow-Headers': '*'
+
+app.use(bodyParser.json())
+
+app.post('/repos', function (req, res){
+
+	var username = req.body.username;
+
+	db.findRepo(username)
+.then((data)=> {
+	return new Promise((resolve, reject)=>{
+		if(data.length===0) {
+			resolve(db)
+		} else {
+			res.send(data);
+		}
 	})
-	next();
-});
-app.use(bodyParse.json())
-app.use(bodyParse.urlencoded({
-  extended: true
-}));
+})
 
-app.post('/repos', function (req, res) {
-  getReposByUsername(req.body.data)
-	.then(response =>  save(response.body))
-	.then(response => {res.status(201); res.end('Post Success')})
-	.catch(err => {console.log("error: ", err); res.status(404); res.end(err)})
-});
-
-app.get('/repos', function (req, res) {
-  getRepos().then(response => res.end(JSON.stringify(response))).catch(err => console.log(err));
+.then((data)=>{
+	return helper.getReposByUsername(username)
+})
+.then((repos)=>{
+	return db.saveAll(repos);
+})
+.then((repos)=>{
+	res.send(repos.ops)
+})
+.catch((err)=>{
+	console.log("err", err)
+	res.send([]);
+})
 });
 
 let port = 1128;

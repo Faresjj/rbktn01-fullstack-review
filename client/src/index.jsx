@@ -4,27 +4,32 @@ import $ from 'jquery';
 import Search from './components/Search.jsx';
 import RepoList from './components/RepoList.jsx';
 
+
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       repos: []
-    }
+    };
 
   }
-  componentDidMount(){
-    $.get("http://127.0.0.1:1128/repos",(res)=>{
-       this.setState({repos: JSON.parse(res)});
-     })
- }
 
   search (term) {
     console.log(`${term} was searched`);
-    $.post("http://127.0.0.1:1128/repos", {data: term}, (res)=> {
-     $.get("http://127.0.0.1:1128/repos",(res)=>{
-        this.setState({repos: JSON.parse(res)});
+    var that = this;
+
+    $.ajax({
+      type: "POST",
+      url: '/repos',
+      contentType: "application/json",
+      data: JSON.stringify({username: term}),
+      success: function(result) {
+        console.log('this =', result);
+        that.setState({
+          repos: result
+        });
+      }
       })
-   })
   }
 
   render () {

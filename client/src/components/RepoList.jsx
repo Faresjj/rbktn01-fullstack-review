@@ -1,16 +1,26 @@
 import React from 'react';
+// import index from '../index.jsx'
 
-const RepoList = (props) => (
-  <div>
-  <h4> Repo List Component </h4>
-  {props.repos.map(repo => <RepoSingle repo = {repo} key ={repo.id} />)}
+const RepoList = (props) => {
+
+const listItems = props.repos.map((repo, index) =>
+  <div className="col-md-3" key={index} style={{border: "groove", padding: "20px", margin: "20px"}}>
+  <h1>{index+1}</h1>
+<p>{repo.userName}</p>
+<p>{repo.repoName}</p>
+<a href={repo.url} target="_blank">Link</a>
 </div>
-)
-const RepoSingle = (props) => (
+ );
+
+return (
  <div>
-   <h5> <a href={props.repo.html_url}> {props.repo.name} </a> </h5>
-   <div> Creator: {props.repo.owner.login}</div>
-   <div> Fork Count: {props.repo.forks_count}</div>
+   <h4>Repo List Component</h4>
+   There are {props.repos.length} repos.
+   <br></br>
+   <div className="row">
+   {listItems}
+  </div>
  </div>
 )
+}
 export default RepoList;
